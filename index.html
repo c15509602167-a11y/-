@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>精馏塔设计的影响因素解析</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      max-width: 1500px;
+      margin: 0px auto;
+      padding: 0 10px;
+      background-color: #f8f9fa;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 0px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 0px;
+    }
+    .main-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 15px;
+    }
+    .panel {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      height: 100%;
+      box-sizing: border-box;
+    }
+    /* 第一行各列样式 - 恢复原始宽度比例 */
+    .tower-col {
+      width: 28%; /* 恢复原始宽度 */
+      vertical-align: top;
+    }
+    .mt-col {
+      width: 52%; /* 恢复原始宽度 */
+      vertical-align: top;
+    }
+    .param-col {
+      width: 20%; /* 恢复原始宽度 */
+      vertical-align: top;
+    }
+    /* 第二行操控区样式 */
+    .control-row {
+      height: auto;
+    }
+    .control-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+    }
+    /* 第三行数据区样式 */
+    .data-row {
+      height: auto;
+    }
+    .data-panel {
+      padding: 15px;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+      color: #34495e;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #3498db;
+      cursor: pointer;
+    }
+    .result-box {
+      margin-top: 0px;
+      padding: 10px;
+      background: #eef7ff;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      border-left: 3px solid #3498db;
+    }
+    .equation-box {
+      margin-top: 10px;
+      padding: 8px;
+      background: #f0f8ff;
+      border-left: 3px solid #3498db;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    button:hover { 
+      opacity: 0.9; 
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+    }
+    button:disabled { 
+      background: #ccc; 
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .export-btn {
+      background: #27ae60;
+    }
+    .study-btn {
+      background: #e67e22;
+    }
+    .help-btn {
+      background: #9b59b6;
+    }
+    .quiz-btn {
+      background: #1abc9c;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 4px;
+    }
+    .tower-svg {
+      max-width: 220px; /* 恢复原始宽度 */
+      height: 590px;
+      margin: 10px auto 0;
+      display: block;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    .data-table th, .data-table td {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: center;
+    }
+    .data-table th {
+      background-color: #e3f2fd;
+      color: #2c3e50;
+    }
+    .data-table tr:hover td {
+      background-color: #f8f9fa;
+    }
+    .warning {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    #feedStudyPlot {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fcf8e3;
+      border-radius: 6px;
+      border-left: 4px solid #f0ad4e;
+    }
+    .param-value {
+      color: #2980b9;
+      font-weight: normal;
+      font-size: 13px;
+      margin-left: 6px;
+      padding: 1px 4px;
+      background: #eef7ff;
+      border-radius: 2px;
+    }
+    .param-note {
+      font-size: 12px;
+      color: #666;
+      margin-top: -8px;
+      margin-bottom: 8px;
+    }
+    h3.panel-title {
+      color: #2c3e50;
+      margin-top: 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 1.1rem;
+    }
+    /* 进料位置分析结果数据表样式优化 - 宽度加大一倍 */
+    #feedStudyPlot table {
+      width: 100% !important;
+      font-size: 14px !important;
+      border-collapse: collapse !important;
+      min-width: 600px; /* 增加最小宽度确保表格足够宽 */
+    }
+    #feedStudyPlot th, #feedStudyPlot td {
+      padding: 8px 12px !important; /* 增加内边距，表格更舒展 */
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+    #feedStudyPlot th {
+      background-color: #f0ad4e33;
+      font-weight: bold;
+    }
+    #feedStudyPlot .table-container {
+      max-height: 180px;
+      overflow-y: auto;
+      margin: 10px 0;
+      width: 100%;
+    }
+    #feedStudyPlot .info-text {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+    #feedStudyPlot .note-text {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+    }
+    /* 测验模态框样式 */
+    #quizModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1001;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+      padding: 20px 0;
+    }
+    #quizContent {
+      background: white;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    }
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #1abc9c;
+    }
+    .quiz-header h2 {
+      margin: 0;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .quiz-close {
+      background: #e74c3c;
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .quiz-question {
+      margin-bottom: 25px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #1abc9c;
+    }
+    .quiz-question h4 {
+      margin: 0 0 12px 0;
+      color: #2c3e50;
+      font-size: 16px;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-option:hover {
+      background: #f0fdfa;
+      border-color: #1abc9c;
+    }
+    .quiz-option input {
+      width: 18px;
+      height: 18px;
+      accent-color: #1abc9c;
+      cursor: pointer;
+    }
+    .quiz-option label {
+      margin: 0;
+      font-weight: normal;
+      cursor: pointer;
+      flex: 1;
+    }
+    .quiz-footer {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      gap: 15px;
+    }
+    .quiz-btn-large {
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .quiz-result {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 8px;
+      display: none;
+    }
+    .result-pass {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+    }
+    .result-fail {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+    }
+    .quiz-result h3 {
+      margin: 0 0 15px 0;
+      text-align: center;
+    }
+    .result-pass h3 {
+      color: #155724;
+    }
+    .result-fail h3 {
+      color: #721c24;
+    }
+    .question-feedback {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 6px;
+      display: none;
+    }
+    .feedback-correct {
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+    }
+    .feedback-incorrect {
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+    }
+    .question-feedback p {
+      margin: 0;
+      font-size: 14px;
+    }
+    .feedback-correct p {
+      color: #2e7d32;
+    }
+    .feedback-incorrect p {
+      color: #c62828;
+    }
+    .question-explanation {
+      margin-top: 8px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #424242;
+    }
+  </style>
+</head>
+<body>
+  <h1>精馏塔设计的影响因素解析</h1>
+  <!-- 使用说明模态框 -->
+  <div id="helpModal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  ">
+    <div style="
+      background: white;
+      width: 90%;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      font-family: 'Segoe UI', sans-serif;
+      line-height: 1.6;
+    ">
+      <h2 style="margin-top:0; color:#2c3e50;">📘 使用说明</h2>
+
+      <h3>🎯 目的</h3>
+      <p>
+        本软件用于辅助《过程工程原理》、《化工原理》或《分离工程》课程中<strong>二元连续精馏塔</strong>的设计与分析，帮助学生直观理解：</p>
+      </p>
+      <ul>
+        <li>McCabe-Thiele 图解法的逐板计算过程</li>
+        <li>回流比、进料热状态、相对挥发度对理论板数的影响</li>
+        <li>最优进料位置的选择及其对能耗（回流比）的影响</li>
+      </ul>
+
+      <h3>🔬 支持的研究内容</h3>
+      <ul>
+        <li><strong>α（相对挥发度）可调</strong>：模拟不同物系（如苯-甲苯 α≈2.5，乙醇-水 α≈2.2）</li>
+        <li><strong>任意 q 值进料</strong>：冷液（q>1）、饱和液（q=1）、气液混合（0&lt;q&lt;1）、饱和蒸汽（q=0）</li>
+        <li><strong>进料位置敏感性分析</strong>：自动计算不同进料板所需最小回流比，找出最优位置</li>
+        <li><strong>数据导出</strong>：一键导出各塔板液相/气相组成（CSV格式），便于绘图或报告撰写</li>
+        <li><strong>知识测验</strong>：随机抽取精馏塔相关选择题，检验学习效果</li>
+      </ul>
+
+      <h3>🖱️ 使用步骤</h3>
+      <ol>
+        <li><strong>调整参数</strong>：通过滑块设置 α、z<sub>F</sub>、x<sub>D</sub>、R、q 和进料板位置（设为 0 表示自动优化）</li>
+        <li><strong>查看结果</strong>：中间区域自动生成 McCabe-Thiele 图、塔结构图、理论板数及 x<sub>W</sub></li>
+        <li><strong>逐板演示</strong>：点击 “▶ 逐板演示” 动态观察阶梯作图过程，对应塔板高亮显示</li>
+        <li><strong>分析进料影响</strong>：点击 “🔬 分析进料位置影响”，程序自动扫描所有可能进料板，给出最优选择</li>
+        <li><strong>导出数据</strong>：点击 “📥 导出 CSV” 获取塔板组成数据，用于 Excel 或 Python 进一步处理</li>
+        <li><strong>知识测验</strong>：点击 “📝 知识测验” 随机抽取5道选择题，检验对精馏塔知识的掌握程度</li>
+      </ol>
+
+      <h3>💡 小贴士</h3>
+      <ul>
+        <li>确保 <code>x<sub>D</sub> &gt; z<sub>F</sub> &gt; x<sub>W</sub></code>，否则无法分离</li>
+        <li>回流比 R 必须大于最小回流比 R<sub>min</sub>，否则无法收敛</li>
+        <li>α 越小（接近 1），分离越难，所需理论板数越多</li>
+        <li>进料板应尽量靠近塔内两操作线交点对应的浓度位置</li>
+      </ul>
+
+      <button onclick="closeHelpModal()" style="
+        margin-top: 20px;
+        padding: 8px 20px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 15px;
+      ">关闭</button>
+    </div>
+  </div>
+
+  <!-- 测验模态框 -->
+  <div id="quizModal">
+    <div id="quizContent">
+      <div class="quiz-header">
+        <h2>📝 精馏塔知识测验</h2>
+        <button class="quiz-close" onclick="closeQuizModal()">&times;</button>
+      </div>
+      
+      <div id="quizQuestions">
+        <!-- 题目将动态生成 -->
+      </div>
+      
+      <div class="quiz-footer">
+        <button class="quiz-btn quiz-btn-large" onclick="submitQuiz()">提交答案</button>
+        <button class="quiz-btn quiz-btn-large" onclick="resetQuiz()">重新答题</button>
+      </div>
+      
+      <div id="quizResult" class="quiz-result">
+        <h3 id="resultTitle"></h3>
+        <div id="resultDetails" style="margin-top: 15px;">
+          <!-- 答题详情将动态生成 -->
+        </div>
+        <button class="quiz-btn quiz-btn-large" style="margin-top: 20px;" onclick="startNewQuiz()">再来一套</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主表格布局 -->
+  <table class="main-table">
+    <!-- 第一行：塔结构 + McCabe图 + 参数面板 -->
+    <tr>
+      <!-- 左侧：精馏塔结构 -->
+      <td class="tower-col">
+        <div class="panel">
+          <h3 class="panel-title">精馏塔结构（#1 = 塔顶第一块板）</h3>
+          <svg class="tower-svg" id="towerSvg" viewBox="0 0 150 550"></svg>
+          <div style="margin-top:0px; font-size:14px; color:#555; text-align:center;">
+            当前板：<span id="currentStage" style="color:#e74c3c; font-weight:bold;">—</span>
+          </div>
+        </div>
+      </td>
+
+      <!-- 中间：McCabe-Thiele图解 -->
+      <td class="mt-col">
+        <div class="panel">
+          <h3 class="panel-title">McCabe-Thiele 图解</h3>
+          <svg id="mtPlot" viewBox="0 0 650 580"></svg> <!-- 增加viewBox高度，给标签留出空间 -->
+        </div>
+      </td>
+
+      <!-- 右侧：参数设置面板 -->
+      <td class="param-col">
+        <div class="panel">
+          <h3 class="panel-title">参数设置</h3>
+          
+          <label for="alpha">相对挥发度 α：<span id="alphaValue" class="param-value">2.50</span></label>
+          <input type="range" id="alpha" min="1.1" max="10" step="0.1" value="2.5">
+
+          <label for="zF">进料组成 z<sub>F</sub>（轻组分）：<span id="zFValue" class="param-value">0.50</span></label>
+          <input type="range" id="zF" min="0.1" max="0.9" step="0.01" value="0.5">
+
+          <label for="xD">塔顶产品 x<sub>D</sub>（轻组分）：<span id="xDValue" class="param-value">0.95</span></label>
+          <input type="range" id="xD" min="0.7" max="0.99" step="0.01" value="0.95">
+
+          <label for="R">回流比 R：<span id="RValue" class="param-value">2.0</span></label>
+          <input type="range" id="R" min="0.5" max="5" step="0.1" value="2.0">
+
+          <label for="q">进料热状态 q：<span id="qValue" class="param-value">1.0</span></label>
+          <input type="range" id="q" min="0" max="2" step="0.1" value="1.0">
+          <div class="param-note">
+            q=1: 饱和液体 | q>1: 冷液 | 0<q<1: 气液混合 | q=0: 饱和蒸汽
+          </div>
+
+          <label for="feedStage">进料板位置（#）：<span id="feedStageValue" class="param-value">自动</span></label>
+          <input type="range" id="feedStage" min="0" max="50" step="1" value="0">
+          <div class="param-note">
+            0 = 自动（最优）；1 = 塔顶第一块理论板
+          </div>
+
+          <div class="result-box" id="results">
+            等待计算...
+          </div>
+
+          <div class="equation-box" id="equations">
+            方程将在此显示
+          </div>
+        </div>
+      </td>
+    </tr>
+
+    <!-- 第二行：操控界面（横向布局） -->
+    <tr class="control-row">
+      <td colspan="3">
+        <div class="panel control-panel">
+          <button onclick="openHelpModal()" class="help-btn">📘 使用说明</button>
+          <button onclick="runFullSimulation()">🔄 重新计算</button>
+          <button onclick="startStepByStep()" id="stepBtn">▶ 逐板演示</button>
+          <button onclick="resetDemo()" id="resetBtn">↺ 重置</button>
+          <button onclick="exportDataToCSV()" class="export-btn">📥 导出 CSV</button>
+          <button onclick="runFeedStageStudy()" class="study-btn">🔬 分析进料位置影响</button>
+          <button onclick="openQuizModal()" class="quiz-btn">📝 知识测验</button>
+        </div>
+      </td>
+    </tr>
+
+    <!-- 第三行：数据展示区 -->
+    <tr class="data-row">
+      <td colspan="3">
+        <div class="panel data-panel">
+          <h3 class="panel-title">数据展示区</h3>
+          <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <!-- 塔板组成数据表 -->
+            <div style="flex: 1; min-width: 300px;">
+              <h4 style="color:#34495e; margin-bottom:8px;">塔板组成数据表</h4>
+              <div style="max-height: 250px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px;">
+                <table class="data-table">
+                  <thead><tr><th>板号</th><th>x<sub>n</sub>（液相）</th><th>y<sub>n</sub>（气相）</th></tr></thead>
+                  <tbody id="dataBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 进料位置研究结果 - 宽度加倍 -->
+            <div style="flex: 2; min-width: 600px;"> <!-- flex从1改为2，宽度加倍 -->
+              <h4 style="color:#34495e; margin-bottom:8px;">进料位置影响分析结果</h4>
+              <div id="feedStudyPlot" style="min-height: 230px; display: flex; flex-direction: column; align-items: center; justify-content: center; color:#666; width: 100%;">
+                <p>点击上方"分析进料位置影响"按钮查看结果</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <script>
+    // === 全局变量 ===
+    let currentAlpha = 2.5;
+    let currentSteps = [];
+    let currentStepIndex = -1;
+    let animationInterval = null;
+    let global_xD, global_xW, global_R, global_zF, global_q;
+    let plateData = [];
+    let quizQuestions = []; // 存储当前测验的题目
+    let allQuizQuestions = []; // 存储所有30道题目
+
+    // === 30道精馏塔相关选择题 ===
+    function initQuizQuestions() {
+      allQuizQuestions = [
+        {
+          id: 1,
+          question: "在McCabe-Thiele图解法中，对角线的意义是？",
+          options: [
+            "气液平衡线",
+            "y = x，用于表示气液组成相等的情况",
+            "精馏段操作线",
+            "提馏段操作线"
+          ],
+          answer: 1,
+          explanation: "对角线y=x是McCabe-Thiele图解法的基准线，代表气液两相组成相等的理想情况，实际分离过程中需要偏离这条线才能实现分离。"
+        },
+        {
+          id: 2,
+          question: "相对挥发度α的值越接近1，说明什么？",
+          options: [
+            "两组分越容易分离",
+            "两组分越难分离",
+            "分离所需理论板数越少",
+            "回流比可以越小"
+          ],
+          answer: 1,
+          explanation: "相对挥发度α是衡量两组分分离难易程度的重要参数。α=1时两组分无法用精馏分离，α越接近1，分离难度越大，所需理论板数越多。"
+        },
+        {
+          id: 3,
+          question: "当进料热状态q=1时，进料属于哪种类型？",
+          options: [
+            "冷液进料",
+            "饱和液体进料",
+            "气液混合进料",
+            "饱和蒸汽进料"
+          ],
+          answer: 1,
+          explanation: "q值表示进料中液相所占的分数：q>1为冷液进料，q=1为饱和液体进料，0<q<1为气液混合进料，q=0为饱和蒸汽进料。"
+        },
+        {
+          id: 4,
+          question: "最小回流比Rmin的物理意义是？",
+          options: [
+            "实现指定分离要求所需的最大回流比",
+            "实现指定分离要求所需的最小回流比，此时理论板数无穷多",
+            "回流比的最佳值",
+            "回流比的最小值，此时理论板数最少"
+          ],
+          answer: 1,
+          explanation: "最小回流比Rmin是实现指定分离要求（xD、xW）所需的最小回流比，此时操作线与q线的交点刚好落在平衡线上，所需理论板数为无穷多。实际回流比必须大于Rmin。"
+        },
+        {
+          id: 5,
+          question: "精馏塔中，精馏段的作用是？",
+          options: [
+            "浓缩轻组分，提高塔顶产品纯度",
+            "浓缩重组分，提高塔釜产品纯度",
+            "提供精馏所需的蒸汽",
+            "提供精馏所需的液体"
+          ],
+          answer: 0,
+          explanation: "精馏段位于进料板上方，通过回流液与上升蒸汽的接触，将蒸汽中的重组分冷凝下来，同时将液体中的轻组分汽化，从而提高塔顶产品中轻组分的纯度。"
+        },
+        {
+          id: 6,
+          question: "提馏段操作线的斜率通常？",
+          options: [
+            "大于1",
+            "等于1",
+            "小于1",
+            "不确定"
+          ],
+          answer: 0,
+          explanation: "提馏段操作线的斜率为L'/V'（提馏段液体流量与蒸汽流量之比），由于L' = L + qF，V' = V - (1-q)F，通常L'/V' > 1，因此提馏段操作线斜率大于1。"
+        },
+        {
+          id: 7,
+          question: "当回流比R增大时，所需理论板数会？",
+          options: [
+            "增加",
+            "减少",
+            "不变",
+            "先增加后减少"
+          ],
+          answer: 1,
+          explanation: "回流比R增大，精馏段操作线斜率R/(R+1)增大，操作线更靠近对角线，所需理论板数减少，但能耗会增加。存在最优回流比使总费用最低。"
+        },
+        {
+          id: 8,
+          question: "在精馏塔设计中，进料板位置的选择应使？",
+          options: [
+            "尽量靠近塔顶",
+            "尽量靠近塔釜",
+            "靠近两操作线交点对应的理论板位置",
+            "任意位置均可"
+          ],
+          answer: 2,
+          explanation: "最优进料板位置应使进料组成与塔内该位置的液相组成相近，即靠近两操作线交点对应的理论板位置，这样可以使分离效率最高，能耗最低。"
+        },
+        {
+          id: 9,
+          question: "精馏塔的操作线方程表示的是？",
+          options: [
+            "气液平衡关系",
+            "相邻塔板间气液组成的关系",
+            "进料组成与产品组成的关系",
+            "回流比与理论板数的关系"
+          ],
+          answer: 1,
+          explanation: "操作线方程描述了精馏塔内相邻塔板间上升蒸汽组成与下降液体组成之间的物料衡算关系，分为精馏段操作线和提馏段操作线。"
+        },
+        {
+          id: 10,
+          question: "对于二元精馏，若xD增大（要求塔顶产品纯度更高），则所需理论板数会？",
+          options: [
+            "增加",
+            "减少",
+            "不变",
+            "无法确定"
+          ],
+          answer: 0,
+          explanation: "在其他条件不变的情况下，要求塔顶产品纯度越高（xD越大），分离难度越大，所需理论板数越多，同时最小回流比Rmin也会增大。"
+        },
+        {
+          id: 11,
+          question: "冷凝器的作用是？",
+          options: [
+            "提供精馏所需的热量",
+            "将塔顶上升蒸汽冷凝为液体，提供回流和产品",
+            "分离气液混合物",
+            "浓缩重组分"
+          ],
+          answer: 1,
+          explanation: "冷凝器位于塔顶，其作用是将塔顶上升的含轻组分较多的蒸汽冷凝为液体，一部分作为回流液返回塔内，另一部分作为塔顶产品采出。"
+        },
+        {
+          id: 12,
+          question: "再沸器的作用是？",
+          options: [
+            "冷却塔釜液体",
+            "将塔釜液体部分汽化，提供上升蒸汽",
+            "分离塔顶蒸汽",
+            "提供回流液"
+          ],
+          answer: 1,
+          explanation: "再沸器位于塔釜，其作用是将塔釜液体部分汽化，产生上升蒸汽，为精馏过程提供传质推动力，同时塔釜剩余液体作为塔底产品采出。"
+        },
+        {
+          id: 13,
+          question: "当进料为冷液进料（q>1）时，q线的斜率为？",
+          options: [
+            "正值且大于1",
+            "正值且小于1",
+            "负值",
+            "无穷大"
+          ],
+          answer: 0,
+          explanation: "q线方程为y = [q/(q-1)]x - zF/(q-1)。当q>1时，q/(q-1)为正值且大于1，因此q线为斜率大于1的直线。"
+        },
+        {
+          id: 14,
+          question: "精馏塔的回流比R是指？",
+          options: [
+            "塔顶回流量与塔顶产品量之比",
+            "塔顶产品量与回流量之比",
+            "回流量与塔釜产品量之比",
+            "回流量与进料量之比"
+          ],
+          answer: 0,
+          explanation: "回流比R的定义为塔顶回流量L与塔顶产品量D之比，即R = L/D。回流比是精馏操作中最重要的操作参数之一。"
+        },
+        {
+          id: 15,
+          question: "在McCabe-Thiele图解法中，理论板数的确定是通过？",
+          options: [
+            "计算法直接得到",
+            "画阶梯线（直角梯级）",
+            "测量操作线长度",
+            "计算平衡线与操作线的交点数"
+          ],
+          answer: 1,
+          explanation: "McCabe-Thiele图解法的核心是在y-x图上，从塔顶xD开始，交替在平衡线和操作线之间画直角梯级，直到达到或低于塔釜xW，每个梯级代表一块理论板。"
+        },
+        {
+          id: 16,
+          question: "若精馏塔的回流比R小于最小回流比Rmin，则会出现什么情况？",
+          options: [
+            "理论板数减少",
+            "无法达到指定的分离要求",
+            "能耗降低",
+            "塔顶产品纯度提高"
+          ],
+          answer: 1,
+          explanation: "回流比R必须大于最小回流比Rmin才能实现指定的分离要求。当R < Rmin时，即使有无穷多块理论板，也无法达到要求的xD和xW。"
+        },
+        {
+          id: 17,
+          question: "精馏过程的传质推动力是什么？",
+          options: [
+            "温度差",
+            "压力差",
+            "浓度差（偏离气液平衡）",
+            "密度差"
+          ],
+          answer: 2,
+          explanation: "精馏过程的传质推动力来源于气液两相组成偏离平衡状态的浓度差。当气相中轻组分浓度高于平衡浓度，或液相中轻组分浓度低于平衡浓度时，就会发生传质。"
+        },
+        {
+          id: 18,
+          question: "对于饱和蒸汽进料（q=0），以下说法正确的是？",
+          options: [
+            "进料中全部为液体",
+            "进料会使提馏段液体流量增加",
+            "进料中全部为蒸汽",
+            "q线为水平线"
+          ],
+          answer: 2,
+          explanation: "q=0表示进料为饱和蒸汽，此时进料中全部为蒸汽相。q线方程为y = zF，是一条水平线。"
+        },
+        {
+          id: 19,
+          question: "精馏塔的操作弹性是指？",
+          options: [
+            "塔的设计能力与实际操作能力之比",
+            "塔能够正常操作的负荷范围",
+            "回流比的调节范围",
+            "理论板数的变化范围"
+          ],
+          answer: 1,
+          explanation: "操作弹性是指精馏塔在保证产品质量合格的前提下，能够正常操作的最大负荷与最小负荷之比，是衡量塔操作稳定性的重要指标。"
+        },
+        {
+          id: 20,
+          question: "在精馏塔中，气液两相接触的方式主要是？",
+          options: [
+            "逆流接触",
+            "并流接触",
+            "错流接触",
+            "折流接触"
+          ],
+          answer: 0,
+          explanation: "精馏塔内气液两相通常采用逆流接触方式，即上升蒸汽与下降液体方向相反，这种接触方式能够提供最大的传质推动力，提高分离效率。"
+        },
+        {
+          id: 21,
+          question: "当进料组成zF增加时，若其他条件不变，塔顶产品xD和塔釜产品xW的变化趋势是？",
+          options: [
+            "xD增大，xW增大",
+            "xD减小，xW减小",
+            "xD不变，xW增大",
+            "xD不变，xW减小"
+          ],
+          answer: 3,
+          explanation: "在回流比、理论板数等条件不变的情况下，进料中轻组分含量zF增加，塔顶产品xD基本保持不变（由操作线决定），而塔釜产品xW会减小（轻组分回收率提高）。"
+        },
+        {
+          id: 22,
+          question: "理论板的定义是？",
+          options: [
+            "实际工业塔中使用的塔板",
+            "气液两相在塔板上达到完全分离的理想塔板",
+            "气液两相在塔板上达到相平衡的理想塔板",
+            "效率为100%的实际塔板"
+          ],
+          answer: 2,
+          explanation: "理论板是一种理想化的塔板，假设气液两相在塔板上充分接触并达到相平衡状态，离开理论板的气液两相组成满足相平衡关系。"
+        },
+        {
+          id: 23,
+          question: "精馏塔的液气比L/V增大，说明？",
+          options: [
+            "回流比减小",
+            "回流比增大",
+            "塔内液体流量减小",
+            "塔内蒸汽流量增大"
+          ],
+          answer: 1,
+          explanation: "液气比L/V与回流比R密切相关，精馏段液气比L/V = R/(R+1)。当R增大时，L/V也增大，意味着塔内液体流量相对蒸汽流量增加，传质效率提高。"
+        },
+        {
+          id: 24,
+          question: "在精馏操作中，若发现塔顶产品纯度不够，可能的原因是？",
+          options: [
+            "回流比太大",
+            "进料板位置太高",
+            "回流比太小",
+            "理论板数太多"
+          ],
+          answer: 2,
+          explanation: "回流比太小会导致精馏段操作线斜率太小，分离能力不足，无法有效浓缩轻组分，从而导致塔顶产品纯度不够。适当增大回流比可以提高塔顶产品纯度。"
+        },
+        {
+          id: 25,
+          question: "对于二元精馏，以下哪个关系式总是成立？",
+          options: [
+            "xD > zF > xW",
+            "xD < zF < xW",
+            "xD = zF = xW",
+            "xD > xW > zF"
+          ],
+          answer: 0,
+          explanation: "精馏的目的是分离混合物，使轻组分在塔顶富集，重组分在塔釜富集。因此必须满足xD（塔顶轻组分含量）> zF（进料轻组分含量）> xW（塔釜轻组分含量）。"
+        },
+        {
+          id: 26,
+          question: "当精馏塔的操作压力升高时，相对挥发度α通常会？",
+          options: [
+            "增大",
+            "减小",
+            "不变",
+            "先增大后减小"
+          ],
+          answer: 1,
+          explanation: "相对挥发度α随压力升高而减小。因为压力升高会使各组分的沸点趋近，挥发度差异减小，导致分离难度增大。"
+        },
+        {
+          id: 27,
+          question: "精馏段操作线与提馏段操作线的交点取决于？",
+          options: [
+            "回流比和进料组成",
+            "进料热状态和进料组成",
+            "回流比和理论板数",
+            "理论板数和进料位置"
+          ],
+          answer: 1,
+          explanation: "两操作线的交点称为挟点，其位置由进料热状态q和进料组成zF决定，与回流比无关。q线方程描述了进料热状态对操作线的影响。"
+        },
+        {
+          id: 28,
+          question: "在精馏塔设计中，通常选择回流比R为最小回流比Rmin的多少倍？",
+          options: [
+            "0.5-0.8倍",
+            "1.1-2.0倍",
+            "2.0-3.0倍",
+            "3.0-5.0倍"
+          ],
+          answer: 1,
+          explanation: "实际回流比通常选择为最小回流比的1.1-2.0倍。这个范围既能保证分离要求，又能避免回流比过大导致的能耗增加和设备投资增加。"
+        },
+        {
+          id: 29,
+          question: "若精馏塔的进料位置过高（靠近塔顶），会导致？",
+          options: [
+            "精馏段板数不足，塔顶产品纯度下降",
+            "提馏段板数不足，塔釜产品纯度下降",
+            "能耗降低",
+            "分离效率提高"
+          ],
+          answer: 1,
+          explanation: "进料位置过高意味着提馏段塔板数减少，重组分无法充分分离，导致塔釜产品纯度下降。最优进料位置应使精馏段和提馏段的板数分配合理。"
+        },
+        {
+          id: 30,
+          question: "McCabe-Thiele图解法的假设条件不包括以下哪项？",
+          options: [
+            "恒摩尔流假设",
+            "理论板假设",
+            "理想溶液假设",
+            "恒压操作假设"
+          ],
+          answer: 2,
+          explanation: "McCabe-Thiele图解法的主要假设包括：恒摩尔流假设、理论板假设、恒压操作假设、二元混合物。该方法并不要求溶液是理想溶液，只需知道气液平衡关系即可。"
+        }
+      ];
+    }
+
+    // === 物性函数（使用 currentAlpha）===
+    function equilibrium(x) {
+      return (currentAlpha * x) / (1 + (currentAlpha - 1) * x);
+    }
+    function solveForXFromY(y) {
+      return y / (currentAlpha - (currentAlpha - 1) * y);
+    }
+
+    // === 计算 Rmin ===
+    function calcRmin(xD, zF, q) {
+      if (Math.abs(q - 1) < 1e-6) {
+        const yq = equilibrium(zF);
+        return Math.max(0, (xD - yq) / (yq - zF));
+      } else {
+        const a = q / (q - 1);
+        const b = -zF / (q - 1);
+        let x = zF;
+        for (let i = 0; i < 30; i++) {
+          const y_eq = equilibrium(x);
+          const y_q = a * x + b;
+          const f = y_eq - y_q;
+          const dy_dx_eq = currentAlpha / Math.pow(1 + (currentAlpha - 1) * x, 2);
+          const df_dx = dy_dx_eq - a;
+          if (Math.abs(df_dx) < 1e-6) break;
+          x -= f / df_dx;
+          x = Math.min(0.999, Math.max(0.001, x));
+        }
+        const x_int = x;
+        const y_int = a * x_int + b;
+        const RminRaw = (xD - y_int) / (y_int - x_int);
+        return Math.max(0, RminRaw);
+      }
+    }
+
+    // === 逐板计算 ===
+    function steppingDetailed(xD, xW, R, zF, q) {
+      const steps = [];
+      plateData = [];
+      let x = xD;
+      let y = xD;
+      let stage = 0;
+      const MAX_STAGES = 100;
+
+      const F = 1;
+      const D = (zF - xW) / (xD - xW);
+      const W = 1 - D;
+      const L_bar = R * D + q * F;
+      const V_bar = (R + 1) * D - (1 - q) * F;
+
+      let xq, yq;
+      if (Math.abs(q - 1) < 1e-6) {
+        xq = zF;
+        yq = (R / (R + 1)) * xq + xD / (R + 1);
+      } else {
+        const a_q = q / (q - 1);
+        const b_q = -zF / (q - 1);
+        const a_rect = R / (R + 1);
+        const b_rect = xD / (R + 1);
+        xq = (b_rect - b_q) / (a_q - a_rect);
+        yq = a_rect * xq + b_rect;
+      }
+
+      plateData.push({stage: 0, x: xD, y: xD});
+
+      while (x > xW) {
+        if (stage >= MAX_STAGES) break;
+
+        const x_eq = solveForXFromY(y);
+        if (x_eq <= xW) {
+          steps.push({ type: 'horizontal', from: {x, y}, to: {x: xW, y} });
+          plateData.push({stage: stage + 1, x: xW, y: y});
+          break;
+        }
+        steps.push({ type: 'horizontal', from: {x, y}, to: {x: x_eq, y} });
+        x = x_eq;
+        stage++;
+        plateData.push({stage, x, y});
+
+        let newY;
+        if (x >= xq) {
+          newY = (R / (R + 1)) * x + xD / (R + 1);
+        } else {
+          newY = (L_bar / V_bar) * x - (W * xW) / V_bar;
+        }
+        steps.push({ type: 'vertical', from: {x, y}, to: {x, y: newY}, stage });
+        y = newY;
+        if (y > 1 || y < 0) break;
+      }
+
+      return { steps, N: stage };
+    }
+
+    // === 智能估算 xW ===
+    function estimateXW(xD, zF, R, q) {
+      const Rmin = calcRmin(xD, zF, q);
+      if (Rmin <= 0) return 0.02;
+
+      let xW = 0.02;
+      for (let i = 0; i < 20; i++) {
+        const { N } = steppingDetailed(xD, xW, R, zF, q);
+        if (N > 25) {
+          xW += 0.003;
+        } else if (N < 4) {
+          xW -= 0.003;
+        } else {
+          break;
+        }
+        xW = Math.min(0.12, Math.max(0.005, xW));
+      }
+      return xW;
+    }
+
+    // === 固定进料板模拟 ===
+    function simulateWithFixedFeed(xD, zF, R, q, totalStages, feedStage, target_xW = 0.05) {
+      let x = xD;
+      let y = xD;
+
+      const D = (zF - target_xW) / (xD - target_xW);
+      const W = 1 - D;
+      const L = R * D;
+      const V = L + D;
+      const L_bar = L + q * 1;
+      const V_bar = V - (1 - q) * 1;
+
+      for (let stage = 1; stage <= totalStages; stage++) {
+        x = solveForXFromY(y);
+        if (stage === totalStages) break;
+
+        if (stage < feedStage) {
+          y = (R / (R + 1)) * x + xD / (R + 1);
+        } else {
+          y = (L_bar / V_bar) * x - (W * target_xW) / V_bar;
+        }
+
+        if (isNaN(y) || y > 1.1 || y < -0.1 || x < 0) {
+          return { success: false, xW: x };
+        }
+      }
+
+      return { success: true, xW: x };
+    }
+
+    // === 搜索最小 R ===
+    function findMinRForFeedStage(xD, zF, q, totalStages, feedStage, target_xW = 0.05) {
+      const Rmin_est = calcRmin(xD, zF, q);
+      if (Rmin_est <= 0) return { feasible: false, R: Infinity };
+
+      let R_low = Rmin_est * 1.01;
+      let R_high = Rmin_est * 4;
+
+      let highOk = simulateWithFixedFeed(xD, zF, R_high, q, totalStages, feedStage, target_xW).xW <= target_xW;
+      if (!highOk) {
+        R_high = Rmin_est * 10;
+        highOk = simulateWithFixedFeed(xD, zF, R_high, q, totalStages, feedStage, target_xW).xW <= target_xW;
+        if (!highOk) return { feasible: false, R: Infinity };
+      }
+
+      for (let iter = 0; iter < 25; iter++) {
+        const R_mid = (R_low + R_high) / 2;
+        const res = simulateWithFixedFeed(xD, zF, R_mid, q, totalStages, feedStage, target_xW);
+        if (res.xW <= target_xW) {
+          R_high = R_mid;
+        } else {
+          R_low = R_mid;
+        }
+      }
+
+      return {
+        R: R_high,
+        achieved_xW: simulateWithFixedFeed(xD, zF, R_high, q, totalStages, feedStage, target_xW).xW,
+        feasible: true
+      };
+    }
+
+    // === 绘图函数 - 缩小绘图区域，修复x标签超出边界问题 ===
+    function drawMTStatic(xD, xW, R, zF, q) {
+      const svg = document.getElementById('mtPlot');
+      svg.innerHTML = '';
+      const size = 550;
+      const margin = 35; // 增加底部边距，给x轴标签留出空间
+      const plotSize = size - 2 * margin; // 缩小绘图区域
+      const offsetX = 60; // 调整水平偏移，避免左侧拥挤
+
+      // x坐标转换函数：调整偏移和缩放
+      const xToSvg = x => margin + offsetX + x * plotSize;
+      const yToSvg = y => size - margin - y * plotSize;
+
+      // 对角线 - 缩小后绘制
+      addLine(svg, xToSvg(0), yToSvg(0), xToSvg(1), yToSvg(1), '#ddd', '4,4', 2);
+      
+      // 平衡线 - 缩小后绘制
+      let eqPath = "M";
+      for (let x=0; x<=1; x+=0.01) eqPath += ` ${xToSvg(x)},${yToSvg(equilibrium(x))}`;
+      addPath(svg, eqPath, 'blue', 2);
+
+      // q线 - 缩小后绘制
+      if (Math.abs(q - 1) < 1e-6) {
+        addLine(svg, xToSvg(zF), yToSvg(0), xToSvg(zF), yToSvg(1), '#8e44ad', '3,3', 2);
+      } else {
+        const a = q / (q - 1);
+        const b = -zF / (q - 1);
+        let x1 = 0, y1 = b;
+        let x2 = 1, y2 = a + b;
+        if (y1 < 0) { y1 = 0; x1 = -b/a; }
+        if (y1 > 1) { y1 = 1; x1 = (1-b)/a; }
+        if (y2 < 0) { y2 = 0; x2 = -b/a; }
+        if (y2 > 1) { y2 = 1; x2 = (1-b)/a; }
+        addLine(svg, xToSvg(x1), yToSvg(y1), xToSvg(x2), yToSvg(y2), '#8e44ad', '3,3', 2);
+      }
+
+      // 精馏段操作线 - 缩小后绘制
+      const yRect0 = xD/(R+1);
+      addLine(svg, xToSvg(0), yToSvg(yRect0), xToSvg(xD), yToSvg(xD), 'red', null, 2);
+
+      // 提馏段操作线 - 缩小后绘制
+      const D = (zF - xW)/(xD - xW);
+      const W = 1 - D;
+      const F = 1;
+      const L_bar = R*D + q*F;
+      const V_bar = (R+1)*D - (1 - q)*F;
+      const slope_s = L_bar / V_bar;
+      const inter_s = - (W * xW) / V_bar;
+      let yStrip0 = inter_s;
+      let yStrip1 = slope_s + inter_s;
+      let xStrip0 = 0;
+      let xStrip1 = 1;
+      if (yStrip0 < 0) { yStrip0 = 0; xStrip0 = -inter_s / slope_s; }
+      if (yStrip0 > 1) { yStrip0 = 1; xStrip0 = (1-inter_s) / slope_s; }
+      if (yStrip1 < 0) { yStrip1 = 0; xStrip1 = -inter_s / slope_s; }
+      if (yStrip1 > 1) { yStrip1 = 1; xStrip1 = (1-inter_s) / slope_s; }
+      addLine(svg, xToSvg(xStrip0), yToSvg(yStrip0), xToSvg(xStrip1), yToSvg(yStrip1), 'purple', null, 2);
+
+      // 关键点 - 缩小后绘制
+      addCircle(svg, xToSvg(xD), yToSvg(xD), 4, 'red');
+      addCircle(svg, xToSvg(xW), yToSvg(xW), 4, 'purple');
+
+      // 坐标轴 - 缩小后绘制
+      addLine(svg, xToSvg(0), yToSvg(0), xToSvg(1), yToSvg(0), 'black', null, 1.5);
+      addLine(svg, xToSvg(0), yToSvg(0), xToSvg(0), yToSvg(1), 'black', null, 1.5);
+
+      // X轴刻度 - 调整位置避免超出
+      for (let i = 0; i <= 10; i++) {
+        const xVal = i / 10;
+        const xPx = xToSvg(xVal);
+        addLine(svg, xPx, yToSvg(0), xPx, yToSvg(0) + 5, 'black', null, 1);
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", xPx);
+        text.setAttribute("y", yToSvg(0) + 20); // 向下移动刻度文字
+        text.setAttribute("font-size", "11");
+        text.setAttribute("text-anchor", "middle");
+        text.textContent = xVal.toFixed(1);
+        svg.appendChild(text);
+      }
+
+      // Y轴刻度 - 调整位置
+      for (let i = 0; i <= 10; i++) {
+        const yVal = i / 10;
+        const yPx = yToSvg(yVal);
+        addLine(svg, xToSvg(0) - 5, yPx, xToSvg(0), yPx, 'black', null, 1);
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", xToSvg(0) - 15); // 向左调整，避免拥挤
+        text.setAttribute("y", yPx + 4);
+        text.setAttribute("font-size", "11");
+        text.setAttribute("text-anchor", "end");
+        text.textContent = yVal.toFixed(1);
+        svg.appendChild(text);
+      }
+
+      // 轴标签 - 调整位置，确保完全显示
+      // X轴标签：大幅向下移动，确保不超出SVG边界
+      addText(svg, xToSvg(0.5), size + 15, "x (液相摩尔分数)", "middle", 12);
+      
+      // Y轴标签：调整位置，避免超出
+      const yLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      yLabel.setAttribute("x", margin + offsetX - 30);
+      yLabel.setAttribute("y", margin + 30);
+      yLabel.setAttribute("font-size", "12");
+      yLabel.setAttribute("text-anchor", "middle");
+      yLabel.setAttribute("transform", "rotate(-90 " + (margin + offsetX - 30) + " " + (margin + 30) + ")");
+      yLabel.textContent = "y (气相摩尔分数)";
+      svg.appendChild(yLabel);
+    }
+
+    function drawStepAtIndex(index) {
+      const svg = document.getElementById('mtPlot');
+      svg.querySelectorAll('.step-line, .step-label').forEach(el => el.remove());
+
+      if (index < 0) return;
+
+      const size = 550;
+      const margin = 35; // 与drawMTStatic保持一致的边距
+      const plotSize = size - 2 * margin;
+      const offsetX = 60; // 与drawMTStatic保持一致的偏移
+
+      const xToSvg = x => margin + offsetX + x * plotSize;
+      const yToSvg = y => size - margin - y * plotSize;
+
+      // 逐板演示的线条也使用缩小后的坐标系统
+      for (let i = 0; i <= index; i++) {
+        const step = currentSteps[i];
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", xToSvg(step.from.x));
+        line.setAttribute("y1", yToSvg(step.from.y));
+        line.setAttribute("x2", xToSvg(step.to.x));
+        line.setAttribute("y2", yToSvg(step.to.y));
+        line.setAttribute("stroke", "#2c3e50");
+        line.setAttribute("stroke-width", "1.8");
+        line.classList.add("step-line");
+        svg.appendChild(line);
+
+        if (step.type === 'vertical' && step.stage !== undefined) {
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", xToSvg(step.to.x) + 6);
+          text.setAttribute("y", yToSvg(step.to.y) - 6);
+          text.setAttribute("font-size", "12");
+          text.setAttribute("fill", "#d35400");
+          text.textContent = `#${step.stage}`;
+          text.classList.add("step-label");
+          svg.appendChild(text);
+        }
+      }
+
+      if (index >= 0 && currentSteps[index].type === 'vertical') {
+        const stage = currentSteps[index].stage;
+        document.getElementById('currentStage').textContent = stage;
+        highlightTowerStage(stage);
+      }
+    }
+
+    function drawTower(N) {
+      const svg = document.getElementById('towerSvg');
+      svg.innerHTML = '';
+      const width = 200, height = 600;
+      const towerX = 80, towerWidth = 40;
+      const topY = 80, bottomY = 500;
+      const plateSpacing = (bottomY - topY) / (N + 1);
+
+      // 塔体
+      addRect(svg, towerX, topY, towerWidth, bottomY - topY, '#333', '#f9f9f9');
+
+      // 塔板
+      for (let i = 1; i <= N; i++) {
+        const y = topY + i * plateSpacing;
+        addLine(svg, towerX, y, towerX + towerWidth, y, '#555', null, 1.5, `plate-${i}`);
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", towerX - 10);
+        text.setAttribute("y", y + 4);
+        text.setAttribute("font-size", "12");
+        text.setAttribute("text-anchor", "end");
+        text.textContent = `#${i}`;
+        svg.appendChild(text);
+      }
+
+      // 冷凝器
+      addRect(svg, towerX - 10, topY - 30, towerWidth + 20, 30, '#27ae60', '#5dcfdb', 'condenser');
+      addText(svg, towerX + towerWidth/2, topY - 15, "冷凝器", "middle");
+
+      // 再沸器
+      addRect(svg, towerX - 10, bottomY , towerWidth + 20, 30, '#db695d', '#db5dcf', 'reboiler');
+      addText(svg, towerX + towerWidth/2, bottomY + 25, "再沸器", "middle");
+
+      // 进料口
+      const feedY = (topY + bottomY) / 2;
+      addLine(svg, 30, feedY, towerX, feedY, '#8e44ad', null, 2);
+      addText(svg, 20, feedY - 5, "进料", "end");
+
+      // 出料口
+      addLine(svg, towerX + towerWidth+10, topY-15 , width - 10, topY -15, '#2980b9', null, 2);
+      addLine(svg, towerX + towerWidth, topY+2 , width - 10, topY +2, '#2980b9', null, 2);
+
+      addText(svg, width - 5, topY + 15, "塔顶", "start");
+      addLine(svg, towerX + towerWidth+10, bottomY+15 , width - 10, bottomY+15, '#2980b9', null, 2);
+      addLine(svg, towerX + towerWidth, bottomY , width - 10, bottomY, '#2980b9', null, 2);
+      addText(svg, width - 5, bottomY - 25, "塔釜", "start");
+    }
+
+    function highlightTowerStage(stage) {
+      document.querySelectorAll('#towerSvg .highlight').forEach(el => el.remove());
+      if (!stage) return;
+      const plate = document.querySelector(`#towerSvg #plate-${stage}`);
+      if (plate) {
+        const bbox = plate.getBBox();
+        const highlight = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        highlight.setAttribute("x", bbox.x - 2);
+        highlight.setAttribute("y", bbox.y - 2);
+        highlight.setAttribute("width", bbox.width + 4);
+        highlight.setAttribute("height", 4);
+        highlight.setAttribute("fill", "#f39c12");
+        highlight.setAttribute("opacity", "0.7");
+        highlight.classList.add("highlight");
+        plate.parentNode.appendChild(highlight);
+      }
+    }
+
+    // 绘图辅助函数
+    function addLine(svg, x1, y1, x2, y2, color, dash = null, width = 1, id = null) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+      line.setAttribute("stroke", color);
+      line.setAttribute("stroke-width", width);
+      if (dash) line.setAttribute("stroke-dasharray", dash);
+      if (id) line.setAttribute("id", id);
+      svg.appendChild(line);
+    }
+    function addRect(svg, x, y, w, h, stroke, fill = 'none', id = null) {
+      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", x); rect.setAttribute("y", y);
+      rect.setAttribute("width", w); rect.setAttribute("height", h);
+      if (stroke) rect.setAttribute("stroke", stroke);
+      rect.setAttribute("fill", fill);
+      if (id) rect.setAttribute("id", id);
+      svg.appendChild(rect);
+    }
+       function addCircle(svg, cx, cy, r, fill) {
+      const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", r);
+      c.setAttribute("fill", fill);
+      svg.appendChild(c);
+    }
+    function addPath(svg, d, stroke, width) {
+      const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      p.setAttribute("d", d);
+      p.setAttribute("fill", "none");
+      p.setAttribute("stroke", stroke);
+      p.setAttribute("stroke-width", width);
+      svg.appendChild(p);
+    }
+    function addText(svg, x, y, txt, anchor = "start", fontSize = 12) {
+      const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      t.setAttribute("x", x);
+      t.setAttribute("y", y);
+      t.setAttribute("font-size", fontSize);
+      t.setAttribute("text-anchor", anchor);
+      t.textContent = txt;
+      svg.appendChild(t);
+    }
+
+    // 更新数据表格
+    function updateDataTable() {
+      const tbody = document.getElementById('dataBody');
+      tbody.innerHTML = '';
+      plateData.forEach(row => {
+        if (row.stage === 0) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.stage}</td>
+          <td>${row.x.toFixed(4)}</td>
+          <td>${row.y.toFixed(4)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 导出CSV（修复乱码）
+    function exportDataToCSV() {
+      if (plateData.length <= 1) {
+        alert("暂无数据可导出，请先运行计算。");
+        return;
+      }
+
+      let csvContent = "Stage,x,y\n"; // 列名英文，避免编码问题
+      plateData.forEach(row => {
+        if (row.stage === 0) return; // 跳过冷凝器
+        csvContent += `${row.stage},${row.x.toFixed(6)},${row.y.toFixed(6)}\n`;
+      });
+
+      const bom = "\uFEFF"; // UTF-8 BOM
+      const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      const safeAlpha = currentAlpha.toFixed(1).replace('.', '_');
+      link.setAttribute("download", `distillation_data_alpha_${safeAlpha}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    // === 测验相关函数 ===
+    // 初始化测验题目
+    initQuizQuestions();
+
+    // 打开测验模态框
+    function openQuizModal() {
+      document.getElementById('quizModal').style.display = 'flex';
+      generateQuizQuestions();
+      document.getElementById('quizResult').style.display = 'none';
+    }
+
+    // 关闭测验模态框
+    function closeQuizModal() {
+      document.getElementById('quizModal').style.display = 'none';
+    }
+
+    // 随机生成5道不重复的题目
+    function generateQuizQuestions() {
+      const questionsContainer = document.getElementById('quizQuestions');
+      questionsContainer.innerHTML = '';
+      quizQuestions = [];
+
+      // 从30道题中随机抽取5道不重复的题目
+      const shuffledQuestions = [...allQuizQuestions].sort(() => 0.5 - Math.random());
+      quizQuestions = shuffledQuestions.slice(0, 5);
+
+      // 渲染题目
+      quizQuestions.forEach((q, index) => {
+        const questionEl = document.createElement('div');
+        questionEl.className = 'quiz-question';
+        questionEl.innerHTML = `
+          <h4>${index + 1}. ${q.question}</h4>
+          <div class="quiz-options">
+            ${q.options.map((option, optIndex) => `
+              <div class="quiz-option">
+                <input type="radio" name="q${q.id}" id="q${q.id}_opt${optIndex}" value="${optIndex}">
+                <label for="q${q.id}_opt${optIndex}">${String.fromCharCode(65 + optIndex)}. ${option}</label>
+              </div>
+            `).join('')}
+          </div>
+          <div class="question-feedback" id="feedback_q${q.id}"></div>
+        `;
+        questionsContainer.appendChild(questionEl);
+      });
+    }
+
+    // 提交答案并判分
+    function submitQuiz() {
+      let score = 0;
+      const total = quizQuestions.length;
+
+      // 检查每道题的答案
+      quizQuestions.forEach(q => {
+        const selectedOption = document.querySelector(`input[name="q${q.id}"]:checked`);
+        const feedbackEl = document.getElementById(`feedback_q${q.id}`);
+        feedbackEl.style.display = 'block';
+
+        if (!selectedOption) {
+          // 未选择答案
+          feedbackEl.className = 'question-feedback feedback-incorrect';
+          feedbackEl.innerHTML = `<p>❌ 未选择答案！正确答案：${String.fromCharCode(65 + q.answer)}. ${q.options[q.answer]}</p>
+                                 <div class="question-explanation">💡 解析：${q.explanation}</div>`;
+        } else {
+          const userAnswer = parseInt(selectedOption.value);
+          if (userAnswer === q.answer) {
+            // 回答正确
+            score++;
+            feedbackEl.className = 'question-feedback feedback-correct';
+            feedbackEl.innerHTML = `<p>✅ 回答正确！</p>
+                                   <div class="question-explanation">💡 解析：${q.explanation}</div>`;
+          } else {
+            // 回答错误
+            feedbackEl.className = 'question-feedback feedback-incorrect';
+            feedbackEl.innerHTML = `<p>❌ 回答错误！你的答案：${String.fromCharCode(65 + userAnswer)}. ${q.options[userAnswer]}<br>
+                                   正确答案：${String.fromCharCode(65 + q.answer)}. ${q.options[q.answer]}</p>
+                                   <div class="question-explanation">💡 解析：${q.explanation}</div>`;
+          }
+        }
+      });
+
+      // 显示测验结果
+      const resultEl = document.getElementById('quizResult');
+      const resultTitleEl = document.getElementById('resultTitle');
+      const resultDetailsEl = document.getElementById('resultDetails');
+
+      resultEl.style.display = 'block';
+      if (score >= total * 0.8) {
+        resultEl.className = 'quiz-result result-pass';
+        resultTitleEl.textContent = `🎉 恭喜！得分：${score}/${total}，优秀！`;
+      } else if (score >= total * 0.6) {
+        resultEl.className = 'quiz-result result-pass';
+        resultTitleEl.textContent = `👏 不错！得分：${score}/${total}，合格！`;
+      } else {
+        resultEl.className = 'quiz-result result-fail';
+        resultTitleEl.textContent = `⚠️ 继续努力！得分：${score}/${total}，未合格！`;
+      }
+
+      // 显示答题详情统计
+      resultDetailsEl.innerHTML = `
+        <p>总题数：${total} 道</p>
+        <p>答对：${score} 道</p>
+        <p>答错/未答：${total - score} 道</p>
+        <p>正确率：${((score / total) * 100).toFixed(1)}%</p>
+      `;
+
+      // 禁用所有选项，防止再次选择
+      document.querySelectorAll('.quiz-option input').forEach(input => {
+        input.disabled = true;
+      });
+    }
+
+    // 重置当前测验（重新选择答案）
+    function resetQuiz() {
+      // 清空所有选择和反馈
+      quizQuestions.forEach(q => {
+        const inputs = document.querySelectorAll(`input[name="q${q.id}"]`);
+        inputs.forEach(input => {
+          input.checked = false;
+          input.disabled = false;
+        });
+        const feedbackEl = document.getElementById(`feedback_q${q.id}`);
+        feedbackEl.style.display = 'none';
+        feedbackEl.innerHTML = '';
+      });
+
+      // 隐藏结果
+      document.getElementById('quizResult').style.display = 'none';
+    }
+
+    // 开始新的测验（重新抽题）
+    function startNewQuiz() {
+      generateQuizQuestions();
+      document.getElementById('quizResult').style.display = 'none';
+    }
+
+    // === 控制逻辑 ===
+    function runFullSimulation() {
+      try {
+        clearInterval(animationInterval);
+        document.getElementById('stepBtn').textContent = "▶ 逐板演示";
+        document.getElementById('currentStage').textContent = "—";
+
+        currentAlpha = parseFloat(document.getElementById('alpha').value);
+        const zF = parseFloat(document.getElementById('zF').value);
+        const xD = parseFloat(document.getElementById('xD').value);
+        const R = parseFloat(document.getElementById('R').value);
+        const q = parseFloat(document.getElementById('q').value);
+        const feedStageInput = parseInt(document.getElementById('feedStage').value);
+
+        // 更新参数显示
+        document.getElementById('alphaValue').textContent = currentAlpha.toFixed(2);
+        document.getElementById('zFValue').textContent = zF.toFixed(2);
+        document.getElementById('xDValue').textContent = xD.toFixed(2);
+        document.getElementById('RValue').textContent = R.toFixed(1);
+        document.getElementById('qValue').textContent = q.toFixed(1);
+        document.getElementById('feedStageValue').textContent = feedStageInput === 0 ? '自动' : feedStageInput;
+
+        // 参数验证
+        if (xD <= zF) {
+          document.getElementById('results').innerHTML = "错误：x<sub>D</sub> 必须大于 z<sub>F</sub>";
+          return;
+        }
+
+        const Rmin = calcRmin(xD, zF, q);
+        if (R <= Rmin) {
+          document.getElementById('results').innerHTML = `R 必须大于 R<sub>min</sub>=${Rmin.toFixed(2)}`;
+          return;
+        }
+
+        // 计算xW
+        let xW;
+        if (feedStageInput === 0) {
+          xW = estimateXW(xD, zF, R, q);
+        } else {
+          xW = 0.05;
+        }
+
+        // 逐板计算
+        const { steps, N } = steppingDetailed(xD, xW, R, zF, q);
+
+        // 保存全局变量
+        global_xD = xD; global_xW = xW; global_R = R; global_zF = zF; global_q = q;
+        currentSteps = steps;
+        currentStepIndex = -1;
+
+        // 更新结果显示
+        let resultsHTML = `
+          α = ${currentAlpha.toFixed(2)}<br>
+          R<sub>min</sub> = ${Rmin.toFixed(2)}<br>
+          x<sub>W</sub> = ${xW.toFixed(4)}<br>
+          理论板数 N = ${N}（含再沸器）
+        `.replace(/sub>/g, 'sub>');
+
+        if (R / Rmin < 1.1) {
+          resultsHTML += '<br><span class="warning">⚠️ R 接近最小回流比</span>';
+        }
+
+        document.getElementById('results').innerHTML = resultsHTML;
+
+        // 更新方程显示
+        let qLineEq, stripEq;
+        if (Math.abs(q - 1) < 1e-6) {
+          qLineEq = `q线: x = ${zF.toFixed(3)}`;
+        } else {
+          const a = (q / (q - 1)).toFixed(3);
+          const b = (-zF / (q - 1)).toFixed(3);
+          qLineEq = `q线: y = ${a}x ${b >= 0 ? '+' : ''} ${b}`;
+        }
+        const D = (zF - xW) / (xD - xW);
+        const W = 1 - D;
+        const F = 1;
+        const L_bar = R*D + q*F;
+        const V_bar = (R+1)*D - (1 - q)*F;
+        const slope_s = (L_bar / V_bar).toFixed(3);
+        const inter_s = (-W * xW / V_bar).toFixed(4);
+        stripEq = `提馏段: y = ${slope_s}x ${inter_s >= 0 ? '+' : ''} ${inter_s}`;
+        document.getElementById('equations').innerHTML = `${qLineEq}<br>${stripEq}`;
+
+        // 绘制图表和表格
+        drawMTStatic(xD, xW, R, zF, q);
+        drawTower(N);
+        updateDataTable();
+      } catch (e) {
+        console.error("runFullSimulation 发生错误:", e);
+        document.getElementById('results').innerHTML = "计算发生错误，请检查输入或刷新页面。";
+      }
+    }
+
+    function startStepByStep() {
+      if (currentSteps.length === 0) {
+        alert("请先点击「重新计算」生成流程！");
+        return;
+      }
+      const btn = document.getElementById('stepBtn');
+      if (btn.textContent.includes("▶")) {
+        btn.textContent = "⏸ 暂停";
+        animationInterval = setInterval(() => {
+          if (currentStepIndex < currentSteps.length - 1) {
+            currentStepIndex++;
+            drawStepAtIndex(currentStepIndex);
+          } else {
+            clearInterval(animationInterval);
+            btn.textContent = "✅ 完成";
+          }
+        }, 900);
+      } else if (btn.textContent.includes("⏸")) {
+        clearInterval(animationInterval);
+        btn.textContent = "▶ 继续";
+      } else {
+        btn.textContent = "⏸ 暂停";
+        animationInterval = setInterval(() => {
+          if (currentStepIndex < currentSteps.length - 1) {
+            currentStepIndex++;
+            drawStepAtIndex(currentStepIndex);
+          } else {
+            clearInterval(animationInterval);
+            btn.textContent = "✅ 完成";
+          }
+        }, 900);
+      }
+    }
+
+    function resetDemo() {
+      clearInterval(animationInterval);
+      currentStepIndex = -1;
+      document.getElementById('stepBtn').textContent = "▶ 逐板演示";
+      document.getElementById('currentStage').textContent = "—";
+      drawStepAtIndex(-1);
+      highlightTowerStage(null);
+    }
+
+    // 进料位置研究 - 优化表格显示
+    async function runFeedStageStudy() {
+      const xD = parseFloat(document.getElementById('xD').value);
+      const zF = parseFloat(document.getElementById('zF').value);
+      const q = parseFloat(document.getElementById('q').value);
+      const R_base = parseFloat(document.getElementById('R').value);
+
+      const xW_base = estimateXW(xD, zF, R_base, q);
+      const { N: totalStages } = steppingDetailed(xD, xW_base, R_base, zF, q);
+      const target_xW = xW_base;
+
+      if (totalStages > 50) {
+        document.getElementById('feedStudyPlot').innerHTML = `
+          <p style="color:red; text-align:center;">总板数过多（N=${totalStages}），建议增大 R 以减少板数后再分析。</p>
+        `;
+        return;
+      }
+
+      document.getElementById('feedStudyPlot').innerHTML = `
+        <p style="color:#34495e; text-align:center;">正在分析 α=${currentAlpha.toFixed(2)} 下，${totalStages} 块板的不同进料位置...</p>
+      `;
+
+      const results = [];
+      const minFeed = 1;
+      const maxFeed = totalStages;
+
+      for (let nf = minFeed; nf <= maxFeed; nf++) {
+        await new Promise(r => setTimeout(r, 5));
+        const res = findMinRForFeedStage(xD, zF, q, totalStages, nf, target_xW);
+        if (res.feasible && isFinite(res.R)) {
+          results.push({ feedStage: nf, R: res.R });
+        }
+      }
+
+      if (results.length === 0) {
+        document.getElementById('feedStudyPlot').innerHTML = `
+          <p style="color:red; text-align:center;">未找到可行解，请检查参数设置。</p>
+        `;
+        return;
+      }
+
+      const best = results.reduce((a, b) => a.R < b.R ? a : b);
+
+      // 优化表格布局，文字集中显示
+      let plotHTML = `
+        <h4 style="margin-top:0; margin-bottom:10px; color:#2c3e50; text-align:center;">
+          回流比 vs 进料板位置（α=${currentAlpha.toFixed(2)}, N=${totalStages}）
+        </h4>
+        <div class="info-text">
+          ✅ 最优进料板：<strong>#${best.feedStage}</strong>（所需 R = ${best.R.toFixed(2)}）
+        </div>
+        <div class="table-container">
+          <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+              <tr style="background-color:#f0ad4e33;">
+                <th>进料板 #</th>
+                <th>所需 R</th>
+                <th>相对能耗 ↑</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      results.forEach(r => {
+        const rel = ((r.R - best.R) / best.R * 100).toFixed(1);
+        const rowClass = r.feedStage === best.feedStage ? 'style="background-color:#d4edda; font-weight:bold;"' : '';
+        plotHTML += `<tr ${rowClass}>
+          <td>${r.feedStage}</td>
+          <td>${r.R.toFixed(2)}</td>
+          <td>${rel}%</td>
+        </tr>`;
+      });
+
+      plotHTML += `
+            </tbody>
+          </table>
+        </div>
+        <div class="note-text">
+          💡 能耗正比于 R；偏离最优进料将增加再沸器热负荷
+        </div>
+      `;
+
+      document.getElementById('feedStudyPlot').innerHTML = plotHTML;
+    }
+
+    // 点击模态框外部关闭
+    document.getElementById('quizModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('quizModal')) {
+        closeQuizModal();
+      }
+    });
+
+    document.getElementById('helpModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('helpModal')) {
+        closeHelpModal();
+      }
+    });
+
+    // 初始化
+    try {
+        // 滑块实时响应
+        document.querySelectorAll('input').forEach(inp => inp.addEventListener('input', runFullSimulation));
+        // 初始计算
+        runFullSimulation();
+    } catch (e) {
+        console.error("页面初始化发生错误:", e);
+        document.body.innerHTML = "<h2 style='text-align:center; margin-top:30px; color:#e74c3c;'>页面初始化失败，请检查代码或刷新重试。</h2>";
+    }
+    // 使用说明控制函数
+    function openHelpModal() {
+      document.getElementById('helpModal').style.display = 'flex';
+    }
+    function closeHelpModal() {
+      document.getElementById('helpModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
